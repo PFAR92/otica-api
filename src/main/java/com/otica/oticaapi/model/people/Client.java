@@ -6,13 +6,20 @@ package com.otica.oticaapi.model.people;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import lombok.Data;
+import org.hibernate.validator.constraints.br.CPF;
 
-@Data
+import lombok.Getter;
+import lombok.Setter;
+
+
+
+@Getter
+@Setter
 @Entity
 @Table(name="client")
 public class Client extends Person{
     
+    @CPF
     private String cpf;
 
 }
