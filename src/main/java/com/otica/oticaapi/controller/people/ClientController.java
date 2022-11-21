@@ -1,19 +1,13 @@
 package com.otica.oticaapi.controller.people;
 
 import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.otica.oticaapi.model.people.Client;
 import com.otica.oticaapi.service.people.ClientService;
@@ -25,9 +19,24 @@ public class ClientController {
     @Autowired
     private ClientService clientService;
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}")
     public Client searchId(@PathVariable Long id){
         return clientService.searchId(id);
+    }
+
+    @GetMapping(value = "/cpf")
+    public Client searchCpf (@RequestParam(value = "cpf") String cpf){
+        return clientService.searchCpf(cpf);
+    }
+
+    @GetMapping(value = "/name")
+    public Client searchName (@RequestParam(value = "name") String name){
+        return clientService.seachName(name);
+    }
+
+    @GetMapping(value = "/names")
+    public List<Client> searchNames (@RequestParam(value = "name") String name){
+        return clientService.searchNames(name);
     }
 
     @GetMapping
@@ -45,8 +54,8 @@ public class ClientController {
         return clientService.alteration(client);
     }
 
-    @DeleteMapping
-    public void delete (@RequestBody Client client){
-          clientService.delete(client);        
+    @DeleteMapping(value = "/{id}")
+    public void delete (@PathVariable Long id){
+          clientService.delete(id);
     }
 }

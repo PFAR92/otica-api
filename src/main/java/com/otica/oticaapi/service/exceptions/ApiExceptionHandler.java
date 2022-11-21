@@ -1,4 +1,4 @@
-package com.otica.oticaapi.exceptions;
+package com.otica.oticaapi.service.exceptions;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,6 +39,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
             String name = ((FieldError)error).getField();
             String mensagem = messageSource.getMessage(error, LocaleContextHolder.getLocale());
 
+            System.err.println(mensagem);
             fields.add(new Error.Field(name, mensagem));
         }
 
@@ -71,7 +72,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
         error.setDateTime(LocalDateTime.now());
         error.setTitle(ex.getMessage());
 
-
+        System.err.println(ex.getMessage());
         return handleExceptionInternal(ex, error, new HttpHeaders(), status, request);
     }
 }

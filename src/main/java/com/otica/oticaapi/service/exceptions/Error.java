@@ -1,4 +1,4 @@
-package com.otica.oticaapi.exceptions;
+package com.otica.oticaapi.service.exceptions;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.otica.oticaapi.exceptions;
+package com.otica.oticaapi.service.exceptions;
 
 public class NotFoudException extends RuntimeException{
     

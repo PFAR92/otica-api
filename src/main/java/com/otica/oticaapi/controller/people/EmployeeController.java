@@ -7,14 +7,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.otica.oticaapi.model.people.Employee;
 import com.otica.oticaapi.service.people.EmployeeService;
@@ -32,6 +25,21 @@ public class EmployeeController {
         return employeeService.searchId(id);
     }
 
+    @GetMapping(value = "/cpf")
+    public Employee searchCpf(@RequestParam(value = "cpf") String cpf){
+        return employeeService.searchCpf(cpf);
+    }
+
+    @GetMapping(value = "/name")
+    public Employee searchName(@RequestParam(value = "name")String name){
+        return employeeService.searchName(name);
+    }
+
+    @GetMapping(value = "/names")
+    public List<Employee> searchNames(@RequestParam(value = "name")String name){
+        return employeeService.searchNames(name);
+    }
+
     @GetMapping
     public List<Employee> list(){
         return employeeService.list();
@@ -47,8 +55,8 @@ public class EmployeeController {
         return employeeService.alteration(employee);
     }
 
-    @DeleteMapping
-    public void delete (@RequestBody Employee employee){
-        employeeService.delete(employee);        
+    @DeleteMapping(value = "/{id}")
+    public void delete (@PathVariable Long id){
+        employeeService.delete(id);
     }
 }

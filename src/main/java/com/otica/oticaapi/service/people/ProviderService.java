@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.otica.oticaapi.exceptions.NotFoudException;
+import com.otica.oticaapi.service.exceptions.NotFoudException;
 import com.otica.oticaapi.model.people.Provider;
 import com.otica.oticaapi.repository.people.ProviderRepository;
 
@@ -18,7 +18,19 @@ public class ProviderService{
 
     
     public Provider searchId(Long id) {
-        return providerRepository.findById(id).orElseThrow(() -> new NotFoudException("Esse fornecedor não existe!"));
+        return providerRepository.findById(id).orElseThrow(() -> new NotFoudException("Esse fornecedor nao existe!"));
+    }
+
+    public Provider searchCnpj(String cnpj){
+        return providerRepository.findByCnpj(cnpj).orElseThrow(() -> new NotFoudException("Cnpj nao encontrado"));
+    }
+
+    public Provider searchName(String name){
+        return providerRepository.findByName(name).orElseThrow(() -> new NotFoudException("Esse fornecedor nao existe"));
+    }
+
+    public List<Provider> searchNames(String name){
+        return providerRepository.findByNameContaining(name);
     }
 
     
@@ -28,22 +40,24 @@ public class ProviderService{
 
     
     public Provider save(Provider provider) {
+        if (providerRepository.existsByCnpj(provider.getCnpj()))
+            throw new NotFoudException("Cnpj ja cadastrado");
         return providerRepository.save(provider);
     }
 
     
     public ResponseEntity<Provider> alteration(Provider provider) {
         if(!providerRepository.existsById(provider.getId()))
-            throw new NotFoudException("Esse Fornecedor não existe!");
+            throw new NotFoudException("Esse Fornecedor nao existe!");
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(providerRepository.save(provider));
     }
 
     
-    public ResponseEntity<Provider> delete(Provider provider) {
-        if(!providerRepository.existsById(provider.getId()))
-            throw new NotFoudException("Esse Fornecedor não existe!");
-        providerRepository.deleteById(provider.getId());
-        return ResponseEntity.noContent().build();
+    public void delete(Long id) {
+        if(!providerRepository.existsById(id))
+            throw new NotFoudException("Esse Fornecedor nao existe!");
+        providerRepository.deleteById(id);
+        ResponseEntity.noContent().build();
         
     }
 }

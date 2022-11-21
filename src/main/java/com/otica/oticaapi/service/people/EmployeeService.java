@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.otica.oticaapi.exceptions.NotFoudException;
+import com.otica.oticaapi.service.exceptions.NotFoudException;
 import com.otica.oticaapi.model.people.Employee;
 import com.otica.oticaapi.repository.people.EmployeeRepository;
 
@@ -18,8 +18,19 @@ public class EmployeeService{
 
     
     public Employee searchId(Long id) {
-        return employeeRepository.findById(id).orElseThrow(() -> new NotFoudException(
-            "Esse Funcionário não existe!"));
+        return employeeRepository.findById(id).orElseThrow(() -> new NotFoudException("Esse Funcionario nao existe!"));
+    }
+
+    public Employee searchCpf(String cpf){
+        return employeeRepository.findByCpf(cpf).orElseThrow(() -> new NotFoudException("Cpf nao encontrado!"));
+    }
+
+    public Employee searchName(String name){
+        return employeeRepository.findByName(name).orElseThrow(() -> new NotFoudException("Esse Funcionario nao existe!"));
+    }
+
+    public List<Employee> searchNames(String name){
+        return employeeRepository.findByNameContaining(name);
     }
 
     
@@ -29,23 +40,25 @@ public class EmployeeService{
 
     
     public Employee save(Employee employee) {
-        return employeeRepository.save(employee);
+        if (employeeRepository.existsByCpf(employee.getCpf()))
+            throw new NotFoudException("Cpf ja cadastrado!");
+        else return employeeRepository.save(employee);
     }
 
     
     public ResponseEntity<Employee> alteration(Employee employee) {
         if(!employeeRepository.existsById(employee.getId()))
-            throw new NotFoudException("Esse funcionário não existe!");
+            throw new NotFoudException("Esse Funcionario nao existe!");
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(employeeRepository.save(employee));
         
     }
 
    
-    public ResponseEntity<Employee> delete(Employee employee) {
-        if(!employeeRepository.existsById(employee.getId()))
-            throw new NotFoudException("Esse Funcionário não existe!");
-        employeeRepository.deleteById(employee.getId());
-        return ResponseEntity.noContent().build();
+    public void delete(Long id) {
+        if(!employeeRepository.existsById(id))
+            throw new NotFoudException("Esse Funcionario nao existe!");
+        employeeRepository.deleteById(id);
+        ResponseEntity.noContent().build();
     }
     
 }
