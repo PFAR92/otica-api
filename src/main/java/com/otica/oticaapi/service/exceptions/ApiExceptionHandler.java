@@ -21,15 +21,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice //intercepta as exceções
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta classe base fornece um método para manipulação de
-                                                                        //Exceções internas do Spring MVC.
-                                                                        //Este método retorna um {@code ResponseEntity}
+    //Exceções internas do Spring MVC.
+    //Este método retorna um {@code ResponseEntity}
 
     @Autowired
     private MessageSource messageSource;
-    
+
     @Override                                                     //Exceção a ser lançada anotado com {@Valid} falha.
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-            HttpHeaders headers, HttpStatus status, WebRequest request) {
+                                                                  HttpHeaders headers, HttpStatus status, WebRequest request) {
         List<Error.Field> fields = new ArrayList<>();
 
         for(ObjectError error : ex.getBindingResult().getAllErrors()) {
@@ -38,7 +38,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
 
             String name = ((FieldError)error).getField();
             String mensagem = messageSource.getMessage(error, LocaleContextHolder.getLocale());
-            
+
             fields.add(new Error.Field(name, mensagem));
         }
 
@@ -53,7 +53,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
         /* Um único local para customizar o corpo da resposta de todos os tipos de exceção.
         A implementação padrão define o {@link WebUtils#ERROR_EXCEPTION_ATTRIBUTE}
         request atributo e cria um {@link ResponseEntity} a partir do dado corpo, cabeçalhos e status.
-
         ex: a exceção
         body: o corpo da resposta
         headers: os cabeçalhos da resposta
@@ -61,7 +60,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
         request: a solicitação atual */
 
     }
-    //Anotação para lidar com exceções em classes de manipulador específicas
+    //Anotação para lidar com exceções em classes de manipulador específicas.
     @ExceptionHandler(NotFoudException.class)
     public ResponseEntity<Object> handleNegocio(NotFoudException ex, WebRequest request){
 
@@ -71,6 +70,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
         error.setStatus(status.value());
         error.setDateTime(LocalDateTime.now());
         error.setTitle(ex.getMessage());
+
 
         return handleExceptionInternal(ex, error, new HttpHeaders(), status, request);
     }
