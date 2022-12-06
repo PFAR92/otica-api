@@ -1,5 +1,7 @@
 package com.otica.oticaapi.controller.people;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -7,14 +9,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.otica.oticaapi.model.people.Employee;
 import com.otica.oticaapi.service.people.EmployeeService;
@@ -27,9 +22,19 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
-    @GetMapping("/{id}")
-    public Employee searchId(@PathVariable Long id){
-        return employeeService.searchId(id);
+    @GetMapping("/id")
+    public Employee searchId(@RequestBody Employee employee){
+        return employeeService.searchId(employee);
+    }
+
+    @GetMapping(value = "/cpf")
+    public Employee searchCpf(@RequestBody Employee employee){
+        return employeeService.searchCpf(employee);
+    }
+
+    @GetMapping(value = "/names")
+    public List<Employee> searchNames(@RequestBody Employee employee){
+        return employeeService.searchNames(employee);
     }
 
     @GetMapping
@@ -49,6 +54,6 @@ public class EmployeeController {
 
     @DeleteMapping
     public void delete (@RequestBody Employee employee){
-        employeeService.delete(employee);        
+        employeeService.delete(employee);
     }
 }
