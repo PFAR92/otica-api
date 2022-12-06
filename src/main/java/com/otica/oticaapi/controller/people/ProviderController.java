@@ -7,7 +7,14 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.otica.oticaapi.model.people.Provider;
 import com.otica.oticaapi.service.people.ProviderService;
@@ -19,19 +26,9 @@ public class ProviderController {
     @Autowired
     private ProviderService providerService;
 
-    @GetMapping("/id")
-    public Provider searchId(@RequestBody Provider provider){
-        return providerService.searchId(provider);
-    }
-
-    @GetMapping(value = "/cnpj")
-    public Provider searchCnpj(@RequestBody Provider provider){
-        return providerService.searchCnpj(provider);
-    }
-
-    @GetMapping(value = "/names")
-    public List<Provider> searchNames(@RequestBody Provider provider){
-        return providerService.searchNames(provider);
+    @GetMapping("/{id}")
+    public Provider searchId(@PathVariable Long id){
+        return providerService.searchId(id);
     }
 
     @GetMapping
@@ -51,6 +48,6 @@ public class ProviderController {
 
     @DeleteMapping
     public void delete (@RequestBody Provider provider){
-        providerService.delete(provider);
+        providerService.delete(provider);        
     }
 }

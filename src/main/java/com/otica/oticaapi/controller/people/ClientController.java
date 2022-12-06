@@ -1,15 +1,19 @@
 package com.otica.oticaapi.controller.people;
 
 import java.util.List;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.otica.oticaapi.model.people.Client;
 import com.otica.oticaapi.service.people.ClientService;
@@ -21,19 +25,9 @@ public class ClientController {
     @Autowired
     private ClientService clientService;
 
-    @GetMapping(value = "/id")
-    public Client searchId(@RequestBody Client client){
-        return clientService.searchId(client);
-    }
-
-    @GetMapping(value = "/cpf")
-    public Client searchCpf (@RequestBody Client client){
-        return clientService.searchCpf(client);
-    }
-
-    @GetMapping(value = "/names")
-    public List<Client> searchNames (@RequestBody Client client){
-        return clientService.searchNames(client);
+    @GetMapping("/{id}")
+    public Client searchId(@PathVariable Long id){
+        return clientService.searchId(id);
     }
 
     @GetMapping
@@ -53,6 +47,6 @@ public class ClientController {
 
     @DeleteMapping
     public void delete (@RequestBody Client client){
-        clientService.delete(client);
+          clientService.delete(client);        
     }
 }

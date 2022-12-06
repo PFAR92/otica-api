@@ -10,4 +10,5 @@ public class OticaApiApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(OticaApiApplication.class, args);
 	}
+
 }
