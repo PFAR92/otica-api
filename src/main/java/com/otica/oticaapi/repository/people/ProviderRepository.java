@@ -11,6 +11,5 @@ public interface ProviderRepository extends JpaRepository<Provider, Long>{
     Optional<Provider> findByCnpj(String cnpj);
     boolean existsByCnpj(String cnpj);
 
-    Optional<Provider> findByName(String name);
     List<Provider> findByNameContaining(String name);
 }

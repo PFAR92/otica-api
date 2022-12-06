@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -27,7 +29,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
     @Autowired
     private MessageSource messageSource;
 
-    @Override                                                     //Exceção a ser lançada anotado com {@Valid} falha.
+    static Logger logger = LogManager.getLogger();
+
+    @Override                                                     //Exceção a ser lançada anotado com {@Valid} quando falhar.
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers, HttpStatus status, WebRequest request) {
         List<Error.Field> fields = new ArrayList<>();
@@ -38,8 +42,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
 
             String name = ((FieldError)error).getField();
             String mensagem = messageSource.getMessage(error, LocaleContextHolder.getLocale());
+            logger.error("Ocorreu o seguinte erro: " + mensagem + ", com o campo: " + name);
 
-            System.err.println(mensagem);
             fields.add(new Error.Field(name, mensagem));
         }
 
@@ -63,7 +67,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
     }
     //Anotação para lidar com exceções em classes de manipulador específicas.
     @ExceptionHandler(NotFoudException.class)
-    public ResponseEntity<Object> handleNegocio(NotFoudException ex, WebRequest request){
+    public ResponseEntity<Object> handleBusiness(NotFoudException ex, WebRequest request){
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
@@ -72,7 +76,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
         error.setDateTime(LocalDateTime.now());
         error.setTitle(ex.getMessage());
 
-        System.err.println(ex.getMessage());
+        logger.error("Ocorreu o seguinte erro: " + ex.getMessage());
         return handleExceptionInternal(ex, error, new HttpHeaders(), status, request);
     }
 }

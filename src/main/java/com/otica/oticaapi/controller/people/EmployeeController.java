@@ -1,5 +1,7 @@
 package com.otica.oticaapi.controller.people;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -20,24 +22,19 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
-    @GetMapping("/{id}")
-    public Employee searchId(@PathVariable Long id){
-        return employeeService.searchId(id);
+    @GetMapping("/id")
+    public Employee searchId(@RequestBody Employee employee){
+        return employeeService.searchId(employee);
     }
 
     @GetMapping(value = "/cpf")
-    public Employee searchCpf(@RequestParam(value = "cpf") String cpf){
-        return employeeService.searchCpf(cpf);
-    }
-
-    @GetMapping(value = "/name")
-    public Employee searchName(@RequestParam(value = "name")String name){
-        return employeeService.searchName(name);
+    public Employee searchCpf(@RequestBody Employee employee){
+        return employeeService.searchCpf(employee);
     }
 
     @GetMapping(value = "/names")
-    public List<Employee> searchNames(@RequestParam(value = "name")String name){
-        return employeeService.searchNames(name);
+    public List<Employee> searchNames(@RequestBody Employee employee){
+        return employeeService.searchNames(employee);
     }
 
     @GetMapping
@@ -55,8 +52,8 @@ public class EmployeeController {
         return employeeService.alteration(employee);
     }
 
-    @DeleteMapping(value = "/{id}")
-    public void delete (@PathVariable Long id){
-        employeeService.delete(id);
+    @DeleteMapping
+    public void delete (@RequestBody Employee employee){
+        employeeService.delete(employee);
     }
 }

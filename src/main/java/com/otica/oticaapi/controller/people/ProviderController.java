@@ -19,24 +19,19 @@ public class ProviderController {
     @Autowired
     private ProviderService providerService;
 
-    @GetMapping("/{id}")
-    public Provider searchId(@PathVariable Long id){
-        return providerService.searchId(id);
+    @GetMapping("/id")
+    public Provider searchId(@RequestBody Provider provider){
+        return providerService.searchId(provider);
     }
 
     @GetMapping(value = "/cnpj")
-    public Provider searchCnpj(@RequestParam(value = "cnpj") String cnpj){
-        return providerService.searchCnpj(cnpj);
-    }
-
-    @GetMapping(value = "/name")
-    public Provider searchName(@RequestParam(value = "name") String name){
-        return providerService.searchName(name);
+    public Provider searchCnpj(@RequestBody Provider provider){
+        return providerService.searchCnpj(provider);
     }
 
     @GetMapping(value = "/names")
-    public List<Provider> searchNames(@RequestParam(value = "name") String name){
-        return providerService.searchNames(name);
+    public List<Provider> searchNames(@RequestBody Provider provider){
+        return providerService.searchNames(provider);
     }
 
     @GetMapping
@@ -54,8 +49,8 @@ public class ProviderController {
         return providerService.alteration(provider);
     }
 
-    @DeleteMapping(value = "/{id}")
-    public void delete (@PathVariable Long id){
-        providerService.delete(id);
+    @DeleteMapping
+    public void delete (@RequestBody Provider provider){
+        providerService.delete(provider);
     }
 }

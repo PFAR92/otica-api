@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface ClientRepository extends JpaRepository<Client, Long>{
 
     List<Client> findByNameContaining(String name);
-    Optional<Client> findByName(String name);
 
     Optional<Client> findByCpf(String cpf);
     boolean existsByCpf(String cpf);

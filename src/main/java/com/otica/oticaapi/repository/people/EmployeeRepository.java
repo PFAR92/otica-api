@@ -12,6 +12,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>{
     Optional<Employee> findByCpf(String cpf);
     boolean existsByCpf(String cpf);
 
-    Optional<Employee> findByName(String name);
     List<Employee> findByNameContaining(String name);
 }
