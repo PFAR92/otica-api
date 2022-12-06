@@ -1,2 +1,4 @@
-package com.otica.oticaapi.model.people;public class Address {
+package com.otica.oticaapi.model.people;
+
+public class Address {
 }
