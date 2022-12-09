@@ -40,7 +40,7 @@ public class ProviderController {
     }
 
     @PostMapping
-    public Provider save (@RequestBody @Valid Provider provider){
+    public ResponseEntity<Provider> save (@RequestBody @Valid Provider provider){
         return providerService.save(provider);
     }
 

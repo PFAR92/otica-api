@@ -2,6 +2,8 @@ package com.otica.oticaapi.controller.people;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +44,7 @@ public class ClientController {
     }
 
     @PostMapping
-    public Client save (@RequestBody @Valid Client client){
+    public ResponseEntity<Client> save (@RequestBody @Valid Client client){
         return clientService.save(client);
     }
 

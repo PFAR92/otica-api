@@ -43,7 +43,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Employee save (@RequestBody @Valid Employee employee){
+    public ResponseEntity<Employee> save (@RequestBody @Valid Employee employee){
         return employeeService.save(employee);
     }
 
