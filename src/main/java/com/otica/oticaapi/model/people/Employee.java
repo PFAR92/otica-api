@@ -23,7 +23,7 @@ public class Employee extends Person{
     @CPF
     private String cpf;
 
-    @Min(value = 1112)
+    @Min(value = 1112, message = "O valor tem que ser acima de um salario minimo")
     private BigDecimal salary;
 
     @NotBlank
