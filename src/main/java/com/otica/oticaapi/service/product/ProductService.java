@@ -49,7 +49,7 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public ResponseEntity<Product> save(Product product)throws ConstraintViolationException {
+    public ResponseEntity<Product> save(Product product) {
         log.info("Solicitou cadastrar um novo produto");
         if (productRepository.existsByName(product.getName()) && productRepository.existsByModel(product.getModel())){
             throw new NotFoundException("ja existe um produto com esse Nome e Modelo cadastrado!");

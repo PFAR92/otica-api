@@ -35,7 +35,7 @@ public class Product implements Serializable {
     private BigDecimal purchase_price;
     @NotBlank
     private String model;
-    @Min(value = 1, message = "Quantidade mínima: 1")
+
     private Long quantity;
 
     @JsonIgnore
