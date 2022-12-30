@@ -17,9 +17,9 @@ public class Acquisition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
-    LocalDate date;
-    BigDecimal fullValue;
+    private Long id;
+    private LocalDate date;
+    private BigDecimal fullValue;
 
     @OneToMany(mappedBy = "acquisition")
     private List<Acquisition_Product> products;
@@ -27,5 +27,5 @@ public class Acquisition {
     @Embedded
     @ManyToOne
     @JoinColumn(name = "provider_id")
-    Provider provider;
+    private Provider provider;
 }

@@ -32,34 +32,34 @@ public class ClientService{
             throw new NotFoundException("Esse cliente nao existe");
         } else {
             log.info("Cliente encontrado");
-            return clientRepository.searchId(client.getId()).get();
+            return clientRepository.findById(client.getId()).get();
         }
     }
 
     public Client searchCpf (Client client){
         log.info("Solicitando busca por CPF do Cliente, CPF digitado: " + client.getCpf());
-        if(!clientRepository.existsCpfClient(client.getCpf()).equals(1)){
+        if(!clientRepository.existsByCpf(client.getCpf())){
             throw new NotFoundException("Esse cliente nao existe");
         }else{
             log.info("CLiente encontrado");
-            return clientRepository.searchCpf(client.getCpf()).get();
+            return clientRepository.findByCpf(client.getCpf()).get();
         }
     }
     public List<Client> searchNames (Client client) {
         log.info("Solicitando busca por nome do Cliente, busca digitada: " + client.getName());
-        return clientRepository.pesquisaNome(client.getName());
+        return clientRepository.findByNameContaining(client.getName());
     }
 
     public List<Client> list() {
         log.info("Solicitou busca por todos os clientes");
-        return clientRepository.findAllClients();
+        return clientRepository.findAll();
     }
 
     
     public ResponseEntity <Client> save(Client client) {
 
         log.info("Solicitou cadastrar novo cliente");
-        if (clientRepository.existsCpfClient(client.getCpf()).equals(1)) {
+        if (clientRepository.existsByCpf(client.getCpf())) {
             throw new NotFoundException("Cpf ja cadastrado!");
         }else{
             String cep = client.getAddress().getCep();
@@ -80,7 +80,7 @@ public class ClientService{
             throw new NotFoundException("Esse cliente nao existe!");
         }
         Client clientAlteration = clientRepository.findById(client.getId()).get();
-        if (clientRepository.existsCpfClient(client.getCpf()).equals(1) && !clientAlteration.getCpf().equals(client.getCpf())) {
+        if (clientRepository.existsByCpf(client.getCpf()) && !clientAlteration.getCpf().equals(client.getCpf())) {
             throw new NotFoundException("Cpf ja esta cadastrado em outro cliente ativo!");
         } else {
             client.setAddress(addressService.addressCep(client.getAddress().getCep()));

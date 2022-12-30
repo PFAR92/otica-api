@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolationException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 @Service
@@ -81,9 +82,15 @@ public class ProductService {
         if (!productRepository.existsById(product.getId())){
             throw new NotFoundException("Esse produto nao existe");
         } else {
-            productRepository.deleteById(product.getId());
+            try {
+                productRepository.deleteById(product.getId());
+            } catch (Exception e){
+                throw new NotFoundException("Esse produto nao pode ser deletado pois ele consta em outros registros como compras ou" +
+                        " vendas e isso faria seu registro ficar incompleto, favor deletar primeiro o registro");
+            }
             log.info("Produto com o id: " + product.getId() + ", deletado com sucesso!");
             ResponseEntity.noContent().build();
+
         }
 
     }

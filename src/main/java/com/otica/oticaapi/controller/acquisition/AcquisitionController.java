@@ -1,4 +1,4 @@
-package com.otica.oticaapi.controller.product;
+package com.otica.oticaapi.controller.acquisition;
 
 import com.otica.oticaapi.model.acquisition.Acquisition;
 import com.otica.oticaapi.service.acquisition.AcquisitionService;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/product/acquisition")
+@RequestMapping(value = "/acquisition")
 public class AcquisitionController {
 
     @Autowired

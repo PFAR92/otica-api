@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Log4j2
 @Service
@@ -75,8 +76,10 @@ public class AcquisitionService {
 
     public ResponseEntity<Acquisition> save(Acquisition acquisition) {
         log.info("Solicitou cadastrar uma nova compra");
-        if (!providerRepository.existsByCnpj(acquisition.getProvider().getCnpj())){
-            throw new NotFoundException("Esse Fornecedor nao existe, favor cadastrar antes");
+        try {
+            acquisition.setProvider(providerRepository.findByCnpj(acquisition.getProvider().getCnpj()).get());
+        } catch (NoSuchElementException ex){
+            throw new NotFoundException("Esse Fornecedor nao existe, favor cadastrar antes, e passar o cnpj correto");
         }
         if (acquisitionRepository.existsByDateAndProvider(acquisition.getDate(), acquisition.getProvider())){
             throw new NotFoundException("Ja existe uma compra cadastrada com essa data e fornecedor, favor atualizar a compra existente!");
@@ -85,15 +88,12 @@ public class AcquisitionService {
         if (acquisition.getDate() == null){
             acquisition.setDate(LocalDate.now());
         }
-        acquisition.setProvider(providerRepository.findByCnpj(acquisition.getProvider().getCnpj()).get());
         List<Acquisition_Product> acquisition_products = new ArrayList<>();
         BigDecimal fullValue = BigDecimal.valueOf(0.0);
-
         //Analisa todos os produtos da compra
         for (Acquisition_Product productList : acquisition.getProducts()){
             Product product = productList.getProduct();
             Acquisition_Product acquisition_product = new Acquisition_Product();
-
             if (productRepository.existsByNameAndModel(product.getName(), product.getModel())){
                 product.setId(productRepository.findByNameAndModel(product.getName(), product.getModel()).getId());
                 acquisition_product.setAcquisition(acquisition);
@@ -135,8 +135,8 @@ public class AcquisitionService {
 
     public ResponseEntity<Acquisition> alteration(Acquisition acquisition) {
         log.info("Solicitou alterar a compra com id: " + acquisition.getId());
-        if (!acquisition_productRepository.existsById(acquisition.getId())){
-            throw new NotFoundException("Essa compra não existe");
+        if (!acquisitionRepository.existsById(acquisition.getId())){
+            throw new NotFoundException("Essa compra nao existe");
         }
         if (!providerRepository.existsByCnpj(acquisition.getProvider().getCnpj())){
             throw new NotFoundException("Esse Fornecedor nao existe, favor cadastrar antes");
@@ -161,6 +161,12 @@ public class AcquisitionService {
                     , acquisitionProduct.getProduct().getModel());
             productSave.setQuantity(productSave.getQuantity() - acquisitionProduct.getOriginalQuantity());
             productService.alteration(productSave);
+
+            //se um produto foi retirado ele é deletado da compra
+            boolean isPresent = acquisition.getProducts().contains(acquisitionProduct);
+            if (!isPresent){
+                acquisition_productRepository.deleteById(acquisitionProduct.getId());
+            }
         }
 
         //Analisa todos os produtos da compra alterada

@@ -4,10 +4,12 @@ import com.otica.oticaapi.model.people.Provider;
 import com.otica.oticaapi.model.acquisition.Acquisition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Repository
 public interface AcquisitionRepository extends JpaRepository<Acquisition, Long> {
 
     @Query(nativeQuery = true, value = "SELECT * FROM acquisition WHERE YEAR(date) = (:year) AND MONTH(date) = (:month)")

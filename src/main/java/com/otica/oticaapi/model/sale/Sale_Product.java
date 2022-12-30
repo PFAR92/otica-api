@@ -1,17 +1,16 @@
-package com.otica.oticaapi.model.acquisition;
+package com.otica.oticaapi.model.sale;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.otica.oticaapi.model.product.Product;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 
-@Entity
 @Getter
 @Setter
-public class Acquisition_Product {
+@Entity
+public class Sale_Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +18,9 @@ public class Acquisition_Product {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "acquisition_id")
+    @JoinColumn(name = "sale_id")
     @JsonIgnore
-    private Acquisition acquisition;
+    private Sale sale;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
@@ -29,5 +28,4 @@ public class Acquisition_Product {
 
     @JsonIgnore
     private Long originalQuantity;
-
 }
