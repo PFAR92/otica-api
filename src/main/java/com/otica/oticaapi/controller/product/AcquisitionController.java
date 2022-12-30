@@ -1,7 +1,7 @@
 package com.otica.oticaapi.controller.product;
 
 import com.otica.oticaapi.model.acquisition.Acquisition;
-import com.otica.oticaapi.service.product.AcquisitionService;
+import com.otica.oticaapi.service.acquisition.AcquisitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +33,15 @@ public class AcquisitionController {
     @PostMapping
     public ResponseEntity<Acquisition> save(@RequestBody Acquisition acquisition){
         return acquisitionService.save(acquisition);
+    }
+
+    @PutMapping
+    public ResponseEntity<Acquisition> alteration(@RequestBody Acquisition acquisition){
+        return acquisitionService.alteration(acquisition);
+    }
+
+    @DeleteMapping
+    public void delete(@RequestBody Acquisition acquisition){
+        acquisitionService.delete(acquisition);
     }
 }
