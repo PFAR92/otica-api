@@ -4,8 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -21,6 +20,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 
+@Log4j2
 @ControllerAdvice //intercepta as exceções
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta classe base fornece um método para manipulação de
     //Exceções internas do Spring MVC.
@@ -28,8 +28,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
 
     @Autowired
     private MessageSource messageSource;
-
-    static Logger logger = LogManager.getLogger();
 
     @Override                                                     //Exceção a ser lançada anotado com {@Valid} quando falhar.
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
@@ -42,7 +40,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
 
             String name = ((FieldError)error).getField();
             String mensagem = messageSource.getMessage(error, LocaleContextHolder.getLocale());
-            logger.error("Ocorreu o seguinte erro: " + mensagem + ", com o campo: " + name);
+            log.error("Ocorreu o seguinte erro: " + mensagem + ", com o campo: " + name);
 
             fields.add(new Error.Field(name, mensagem));
         }
@@ -76,7 +74,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
         error.setDateTime(LocalDateTime.now());
         error.setTitle(ex.getMessage());
 
-        logger.error("Ocorreu o seguinte erro: " + ex.getMessage());
+        log.error("Ocorreu o seguinte erro: " + ex.getMessage());
         return handleExceptionInternal(ex, error, new HttpHeaders(), status, request);
     }
 }
