@@ -64,8 +64,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{ //Esta 
 
     }
     //Anotação para lidar com exceções em classes de manipulador específicas.
-    @ExceptionHandler(NotFoudException.class)
-    public ResponseEntity<Object> handleBusiness(NotFoudException ex, WebRequest request){
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Object> handleBusiness(NotFoundException ex, WebRequest request){
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
 

@@ -12,12 +12,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long>{
 
-    /*List<Client> findByNameContaining(String name);
+    List<Client> findByNameContaining(String name);
 
     Optional<Client> findByCpf(String cpf);
-    boolean existsByCpf(String cpf);*/
+    boolean existsByCpf(String cpf);
 
-    @Query(nativeQuery = true, value = "select * from client")
+    /*@Query(nativeQuery = true, value = "select * from client")
     List<Client> findAllClients();
 
     @Query(nativeQuery = true, value = "select * from client where id = (:id)")
@@ -30,7 +30,7 @@ public interface ClientRepository extends JpaRepository<Client, Long>{
     Integer existsCpfClient(String cpf);
 
     @Query(nativeQuery = true, value = "select * from client where name like (%:name%)")
-    List<Client>pesquisaNome(String name);
+    List<Client>pesquisaNome(String name);*/
 
 
 

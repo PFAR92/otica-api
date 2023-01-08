@@ -22,7 +22,7 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
-    @GetMapping("/id")
+    @GetMapping(value = "/id")
     public Employee searchId(@RequestBody Employee employee){
         return employeeService.searchId(employee);
     }

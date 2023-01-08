@@ -1,11 +1,6 @@
 package com.otica.oticaapi.controller.people;
 
 import java.util.List;
-
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 
 import javax.validation.Valid;
