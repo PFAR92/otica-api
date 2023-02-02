@@ -1,2 +1,2 @@
 # otica-api
-api rest controle de ótica em desenvolvimento
+api rest controle de ótica
