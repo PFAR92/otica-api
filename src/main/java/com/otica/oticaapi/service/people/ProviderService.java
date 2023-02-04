@@ -3,7 +3,7 @@ package com.otica.oticaapi.service.people;
 import java.util.List;
 
 import com.otica.oticaapi.repository.address.AddressRepository;
-import com.otica.oticaapi.service.address.AddressService;
+import com.otica.oticaapi.service.address.AddressCepConsult;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class ProviderService{
     @Autowired
     private AddressRepository addressRepository;
     @Autowired
-    private AddressService addressService;
+    private AddressCepConsult addressCepConsult;
 
 
     
@@ -66,7 +66,7 @@ public class ProviderService{
             throw new NotFoundException("Cnpj ja cadastrado");
         } else {
             String cep = provider.getAddress().getCep();
-            provider.setAddress(addressService.addressCep(cep));
+            provider.setAddress(addressCepConsult.addressCep(cep));
             if (!addressRepository.existsById(cep)){
                 addressRepository.save(provider.getAddress());
             }
@@ -86,7 +86,7 @@ public class ProviderService{
             throw new NotFoundException("Esse Cnpj ja esta cadastrado em um Fornecedor ativo");
         } else {
             log.info("Fornecedor com ID: " + provider.getId() + ", alterado com sucesso!");
-            provider.setAddress(addressService.addressCep(provider.getAddress().getCep()));
+            provider.setAddress(addressCepConsult.addressCep(provider.getAddress().getCep()));
             if (!addressRepository.existsById(provider.getAddress().getCep())){
                 addressRepository.save(provider.getAddress());
             }

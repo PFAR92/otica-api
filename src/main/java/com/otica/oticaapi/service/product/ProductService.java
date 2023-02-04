@@ -1,11 +1,10 @@
 package com.otica.oticaapi.service.product;
 
-import com.otica.oticaapi.model.address.Address;
 import com.otica.oticaapi.model.product.Product;
 import com.otica.oticaapi.repository.address.AddressRepository;
 import com.otica.oticaapi.repository.people.ProviderRepository;
 import com.otica.oticaapi.repository.product.ProductRepository;
-import com.otica.oticaapi.service.address.AddressService;
+import com.otica.oticaapi.service.address.AddressCepConsult;
 import com.otica.oticaapi.service.exceptions.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.validation.ConstraintViolationException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 @Service
@@ -28,7 +25,7 @@ public class ProductService {
     @Autowired
     private AddressRepository addressRepository;
     @Autowired
-    private AddressService addressService;
+    private AddressCepConsult addressCepConsult;
 
     public Product searchId (Product product){
         log.info("Solicitou busca de produto por id, id digitado: " + product.getId());
