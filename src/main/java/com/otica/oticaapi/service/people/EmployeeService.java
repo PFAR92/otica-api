@@ -3,7 +3,7 @@ package com.otica.oticaapi.service.people;
 import java.util.List;
 
 import com.otica.oticaapi.repository.address.AddressRepository;
-import com.otica.oticaapi.service.address.AddressService;
+import com.otica.oticaapi.service.address.AddressCepConsult;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ public class EmployeeService{
     @Autowired
     private AddressRepository addressRepository;
     @Autowired
-    private AddressService addressService;
+    private AddressCepConsult addressCepConsult;
 
 
     
@@ -65,7 +65,7 @@ public class EmployeeService{
             throw new NotFoundException("Cpf ja cadastrado!");
         } else {
             String cep = employee.getAddress().getCep();
-            employee.setAddress(addressService.addressCep(cep));
+            employee.setAddress(addressCepConsult.addressCep(cep));
             if (!addressRepository.existsById(cep)){
                 addressRepository.save(employee.getAddress());
             }
@@ -86,7 +86,7 @@ public class EmployeeService{
             throw new NotFoundException("Esse cpf ja esta cadastrado em um Funcionário ativo");
         } else {
             log.info("Funcionario com o ID: " + employee.getId() + ", alterado com sucesso!");
-            employee.setAddress(addressService.addressCep(employee.getAddress().getCep()));
+            employee.setAddress(addressCepConsult.addressCep(employee.getAddress().getCep()));
             if (!addressRepository.existsById(employee.getAddress().getCep())){
                 addressRepository.save(employee.getAddress());
             }

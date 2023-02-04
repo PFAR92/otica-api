@@ -1,14 +1,29 @@
 package com.otica.oticaapi.service.address;
 
 import com.otica.oticaapi.model.address.Address;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import com.otica.oticaapi.repository.address.AddressRepository;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-@FeignClient(name = "viacep", url = "https://viacep.com.br/ws")
-public interface AddressService {
+@Service
+@Log4j2
+public class AddressService {
 
-    @GetMapping("/{cep}/json/")
-    Address addressCep(@PathVariable("cep") String cep);
+    @Autowired
+    private AddressRepository addressRepository;
+    @Autowired
+    private AddressCepConsult addressCepConsult;
 
+
+    public Address addressCep(String cep){
+        return addressCepConsult.addressCep(cep);
+    }
+
+    public void thisAddressDoesNotExist(Address address){
+        if (!addressRepository.existsById(address.getCep())){
+            addressRepository.save(address);
+            log.info("endereço salvo");
+        }
+    }
 }
