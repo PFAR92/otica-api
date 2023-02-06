@@ -1,16 +1,13 @@
 package com.otica.oticaapi.service.people;
 
 import java.util.List;
-import com.otica.oticaapi.repository.address.AddressRepository;
+
 import com.otica.oticaapi.service.address.AddressService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.otica.oticaapi.service.exceptions.NotFoundException;
+import com.otica.oticaapi.service.exceptions.CustonException;
 import com.otica.oticaapi.model.people.Client;
 import com.otica.oticaapi.repository.people.ClientRepository;
 
@@ -50,8 +47,7 @@ public class ClientService{
         log.info("Solicitou cadastrar novo cliente");
         clientCannotBeRegistered(client);
 
-        String cep = client.getAddress().getCep();
-        client.setAddress(addressService.addressCep(cep));
+        client.setAddress(addressService.addressCep(client.getAddress().getCep()));
 
         addressService.thisAddressDoesNotExist(client.getAddress());
 
@@ -87,24 +83,24 @@ public class ClientService{
 
     public void existsClient(Long id){
         if (!clientRepository.existsById(id)){
-            throw new NotFoundException("Esse cliente nao existe");
+            throw new CustonException("Esse cliente nao existe");
         }
     }
     public void existsClient(String cpf){
         if (!clientRepository.existsByCpf(cpf)){
-            throw new NotFoundException("Nao existe cliente com esse cpf");
+            throw new CustonException("Nao existe cliente com esse cpf");
         }
     }
 
     public void clientCannotBeRegistered(Client client){
         if (client.getId() == null){
             if (clientRepository.existsByCpf(client.getCpf())){
-                throw new NotFoundException("Ja existe um cliente cadastrado com esse cpf");
+                throw new CustonException("Ja existe um cliente cadastrado com esse cpf");
             }
         } else {
             Client clientAlteration = clientRepository.findById(client.getId()).get();
             if (clientRepository.existsByCpf(client.getCpf()) && !client.getCpf().equals(clientAlteration.getCpf())){
-                throw new NotFoundException("Ja existe outro cliente cadastrado com esse cpf");
+                throw new CustonException("Ja existe outro cliente cadastrado com esse cpf");
             }
         }
     }

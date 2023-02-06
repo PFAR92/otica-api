@@ -7,7 +7,7 @@ import com.otica.oticaapi.repository.acquisition.Acquisition_ProductRepository;
 import com.otica.oticaapi.repository.people.ProviderRepository;
 import com.otica.oticaapi.repository.acquisition.AcquisitionRepository;
 import com.otica.oticaapi.repository.product.ProductRepository;
-import com.otica.oticaapi.service.exceptions.NotFoundException;
+import com.otica.oticaapi.service.exceptions.CustonException;
 import com.otica.oticaapi.service.product.ProductService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class AcquisitionService {
     public Acquisition searchId(Acquisition acquisition) {
         log.info("Solicitou busca de compra por id, id digitado: " + acquisition.getId());
         if (!acquisitionRepository.existsById(acquisition.getId())){
-            throw new NotFoundException("Essa compra nao existe");
+            throw new CustonException("Essa compra nao existe");
         } else {
             log.info("Compra com o id:" + acquisition.getId() + ", encontrado");
             Acquisition acquisitionOrigin = acquisitionRepository.findById(acquisition.getId()).get();
@@ -79,10 +79,10 @@ public class AcquisitionService {
         try {
             acquisition.setProvider(providerRepository.findByCnpj(acquisition.getProvider().getCnpj()).get());
         } catch (NoSuchElementException ex){
-            throw new NotFoundException("Esse Fornecedor nao existe, favor cadastrar antes, e passar o cnpj correto");
+            throw new CustonException("Esse Fornecedor nao existe, favor cadastrar antes, e passar o cnpj correto");
         }
         if (acquisitionRepository.existsByDateAndProvider(acquisition.getDate(), acquisition.getProvider())){
-            throw new NotFoundException("Ja existe uma compra cadastrada com essa data e fornecedor, favor atualizar a compra existente!");
+            throw new CustonException("Ja existe uma compra cadastrada com essa data e fornecedor, favor atualizar a compra existente!");
         }
         //se a data não for preenchida será usada a data atual
         if (acquisition.getDate() == null){
@@ -136,17 +136,17 @@ public class AcquisitionService {
     public ResponseEntity<Acquisition> alteration(Acquisition acquisition) {
         log.info("Solicitou alterar a compra com id: " + acquisition.getId());
         if (!acquisitionRepository.existsById(acquisition.getId())){
-            throw new NotFoundException("Essa compra nao existe");
+            throw new CustonException("Essa compra nao existe");
         }
         if (!providerRepository.existsByCnpj(acquisition.getProvider().getCnpj())){
-            throw new NotFoundException("Esse Fornecedor nao existe, favor cadastrar antes");
+            throw new CustonException("Esse Fornecedor nao existe, favor cadastrar antes");
         }
         //verifica se o usuário não alterou para um compra com o mesmo fornecedor e data de alguma compra que ja existe
         Acquisition acquisitionAlteration = acquisitionRepository.findById(acquisition.getId()).get();
         boolean validation = !acquisitionAlteration.getDate().equals(acquisition.getDate()) && acquisitionAlteration.getProvider()
                                 .equals(acquisition.getProvider());
         if (validation && acquisitionRepository.existsByDateAndProvider(acquisition.getDate(), acquisition.getProvider())){
-            throw new NotFoundException("Ja existe outra compra salva com essa data e fornecedor, favor atualizar a compra correta");
+            throw new CustonException("Ja existe outra compra salva com essa data e fornecedor, favor atualizar a compra correta");
         }
 
         acquisition.setProvider(providerRepository.findByCnpj(acquisition.getProvider().getCnpj()).get());
@@ -218,7 +218,7 @@ public class AcquisitionService {
     public void delete(Acquisition acquisition) {
         log.info("Solicitou deletar compra com o id:" + acquisition.getId());
         if (!acquisitionRepository.existsById(acquisition.getId())){
-            throw new NotFoundException("Essa compra nao existe!");
+            throw new CustonException("Essa compra nao existe!");
         }
         //atualizar a quantidade dos produtos da compra deletada
         Acquisition acquisitionDelete = acquisitionRepository.findById(acquisition.getId()).get();
