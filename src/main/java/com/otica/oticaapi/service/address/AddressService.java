@@ -2,6 +2,8 @@ package com.otica.oticaapi.service.address;
 
 import com.otica.oticaapi.model.address.Address;
 import com.otica.oticaapi.repository.address.AddressRepository;
+import com.otica.oticaapi.service.exceptions.CustonException;
+import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +19,12 @@ public class AddressService {
 
 
     public Address addressCep(String cep){
-        return addressCepConsult.addressCep(cep);
+        try {
+            return addressCepConsult.addressCep(cep);
+        } catch (FeignException ex){
+            throw new CustonException("cep invalido, confira o cep digitado");
+        }
+
     }
 
     public void thisAddressDoesNotExist(Address address){

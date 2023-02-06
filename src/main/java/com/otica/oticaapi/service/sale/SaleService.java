@@ -7,7 +7,7 @@ import com.otica.oticaapi.repository.people.ClientRepository;
 import com.otica.oticaapi.repository.product.ProductRepository;
 import com.otica.oticaapi.repository.sale.SaleRepository;
 import com.otica.oticaapi.repository.sale.Sale_ProductRepository;
-import com.otica.oticaapi.service.exceptions.NotFoundException;
+import com.otica.oticaapi.service.exceptions.CustonException;
 import com.otica.oticaapi.service.product.ProductService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class SaleService {
     public Sale searchId(Sale sale) {
         log.info("Solicitou busca de vendas por id, id digitado:" + sale.getId());
         if (!saleRepository.existsById(sale.getId())){
-            throw new NotFoundException("essa venda nao existe!");
+            throw new CustonException("essa venda nao existe!");
         }
         Sale saleId = saleRepository.findById(sale.getId()).get();
         for (Sale_Product product : saleId.getProducts()){
@@ -79,7 +79,7 @@ public class SaleService {
         try {
             sale.setClient(clientRepository.findByCpf(sale.getClient().getCpf()).get());
         } catch (NoSuchElementException ex){
-            throw new NotFoundException("Esse Cliente nao existe, favor cadastrar antes, e passar o cpf correto");
+            throw new CustonException("Esse Cliente nao existe, favor cadastrar antes, e passar o cpf correto");
         }
         //se a data não for preenchida será usada a data atual
         if (sale.getDate() == null){
@@ -111,13 +111,13 @@ public class SaleService {
                     productSave.setQuantity(productSave.getQuantity() - sale_productSave.getOriginalQuantity());
                     productService.alteration(productSave);
                 } else {
-                    throw new NotFoundException("a quantidade da venda é maior que a quantidade em estoque, favor atualizar");
+                    throw new CustonException("a quantidade da venda é maior que a quantidade em estoque, favor atualizar");
                 }
 
                 sale_productSave.setProduct(product);
 
             } else {
-                throw new NotFoundException("Esse produto:" + product.getName() + ", nao existe, favor cadastrar;");
+                throw new CustonException("Esse produto:" + product.getName() + ", nao existe, favor cadastrar;");
             }
 
             //soma o valor dos produtos e adiciona ao valor final
@@ -151,13 +151,13 @@ public class SaleService {
     public ResponseEntity<Sale> alteration(Sale sale) {
         log.info("Solicitou alterar a venda com o id:" + sale.getId());
         if (!saleRepository.existsById(sale.getId())) {
-            throw new NotFoundException("essa venda nao existe!");
+            throw new CustonException("essa venda nao existe!");
         }
         //verifica se o cliente ja existe no banco de dados
         try {
             sale.setClient(clientRepository.findByCpf(sale.getClient().getCpf()).get());
         } catch (NoSuchElementException ex) {
-            throw new NotFoundException("Esse Cliente nao existe, favor cadastrar antes, e passar o cpf correto");
+            throw new CustonException("Esse Cliente nao existe, favor cadastrar antes, e passar o cpf correto");
         }
 
         BigDecimal fullValue = BigDecimal.valueOf(0.0);
@@ -202,13 +202,13 @@ public class SaleService {
                     productSave.setQuantity(productSave.getQuantity() - sale_productSave.getOriginalQuantity());
                     productService.alteration(productSave);
                 } else {
-                    throw new NotFoundException("a quantidade da venda é maior que a quantidade em estoque, favor atualizar");
+                    throw new CustonException("a quantidade da venda é maior que a quantidade em estoque, favor atualizar");
                 }
 
                 sale_productSave.setProduct(product);
 
             } else {
-                throw new NotFoundException("Esse produto:" + product.getName() + ", nao existe, favor cadastrar;");
+                throw new CustonException("Esse produto:" + product.getName() + ", nao existe, favor cadastrar;");
             }
 
             //soma o valor dos produtos e adiciona ao valor final
@@ -241,7 +241,7 @@ public class SaleService {
     public void delete(Sale sale) {
         log.info("Solicitou deletar a venda com id:" + sale.getId());
         if (!saleRepository.existsById(sale.getId())){
-            throw new NotFoundException("Essa venda nao existe!");
+            throw new CustonException("Essa venda nao existe!");
         }
         Sale saleDelete = saleRepository.findById(sale.getId()).get();
          //retornar a quantidade de produtos da venda deletada para o banco de dados

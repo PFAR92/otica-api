@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.otica.oticaapi.service.exceptions.NotFoundException;
+import com.otica.oticaapi.service.exceptions.CustonException;
 import com.otica.oticaapi.model.people.Provider;
 import com.otica.oticaapi.repository.people.ProviderRepository;
 
@@ -30,7 +30,7 @@ public class ProviderService{
     public Provider searchId(Provider provider) {
         log.info("Solicitou busca do Fornecedor por ID, ID digitado: " + provider.getId());
         if (!providerRepository.existsById(provider.getId())){
-            throw new NotFoundException("Esse Fornecedor nao existe");
+            throw new CustonException("Esse Fornecedor nao existe");
         } else {
             log.info("Fornecedor encontrado");
             return providerRepository.findById(provider.getId()).get();
@@ -40,7 +40,7 @@ public class ProviderService{
     public Provider searchCnpj(Provider provider){
         log.info("Solicitou busca por CNPJ do Fornecedor, CNPJ digitado: " + provider.getCnpj());
         if (!providerRepository.existsByCnpj(provider.getCnpj())){
-            throw new NotFoundException("Esse Fornecedor nao existe!");
+            throw new CustonException("Esse Fornecedor nao existe!");
         } else {
             log.info("Fornecedor encontrado");
             return providerRepository.findByCnpj(provider.getCnpj()).get();
@@ -63,7 +63,7 @@ public class ProviderService{
 
         log.info("Solicitou cadastro de novo fornecedor");
         if (providerRepository.existsByCnpj(provider.getCnpj())) {
-            throw new NotFoundException("Cnpj ja cadastrado");
+            throw new CustonException("Cnpj ja cadastrado");
         } else {
             String cep = provider.getAddress().getCep();
             provider.setAddress(addressCepConsult.addressCep(cep));
@@ -79,11 +79,11 @@ public class ProviderService{
     public ResponseEntity<Provider> alteration(Provider provider) {
         log.info("Solicitou alterar o Fornecedor com o ID: " + provider.getId());
         if(!providerRepository.existsById(provider.getId())) {
-            throw new NotFoundException("Esse Fornecedor nao existe!");
+            throw new CustonException("Esse Fornecedor nao existe!");
         }
         Provider providerAlteration = providerRepository.findById(provider.getId()).get();
         if (providerRepository.existsByCnpj(provider.getCnpj()) && !providerAlteration.getCnpj().equals(provider.getCnpj())){
-            throw new NotFoundException("Esse Cnpj ja esta cadastrado em um Fornecedor ativo");
+            throw new CustonException("Esse Cnpj ja esta cadastrado em um Fornecedor ativo");
         } else {
             log.info("Fornecedor com ID: " + provider.getId() + ", alterado com sucesso!");
             provider.setAddress(addressCepConsult.addressCep(provider.getAddress().getCep()));
@@ -99,7 +99,7 @@ public class ProviderService{
 
         log.info("Solicitou excluir Fornecedor com o ID: " + provider.getId());
         if(!providerRepository.existsById(provider.getId())) {
-            throw new NotFoundException("Esse Fornecedor nao existe!");
+            throw new CustonException("Esse Fornecedor nao existe!");
         } else {
             log.info("Fornecedor com o ID: " + provider.getId() + " excluido com sucesso!");
             providerRepository.deleteById(provider.getId());
