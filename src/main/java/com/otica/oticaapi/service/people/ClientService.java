@@ -1,15 +1,14 @@
 package com.otica.oticaapi.service.people;
 
-import java.util.List;
-
+import com.otica.oticaapi.model.people.Client;
+import com.otica.oticaapi.repository.people.ClientRepository;
 import com.otica.oticaapi.service.address.AddressService;
+import com.otica.oticaapi.service.exceptions.CustonException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import com.otica.oticaapi.service.exceptions.CustonException;
-import com.otica.oticaapi.model.people.Client;
-import com.otica.oticaapi.repository.people.ClientRepository;
+import java.util.List;
 
 @Service
 @Log4j2
@@ -83,24 +82,24 @@ public class ClientService{
 
     public void existsClient(Long id){
         if (!clientRepository.existsById(id)){
-            throw new CustonException("Esse cliente nao existe");
+            throw new CustonException("O cliente com o id "+id+", nao existe");
         }
     }
     public void existsClient(String cpf){
         if (!clientRepository.existsByCpf(cpf)){
-            throw new CustonException("Nao existe cliente com esse cpf");
+            throw new CustonException("Nao existe cliente com esse cpf " +cpf);
         }
     }
 
     public void clientCannotBeRegistered(Client client){
         if (client.getId() == null){
             if (clientRepository.existsByCpf(client.getCpf())){
-                throw new CustonException("Ja existe um cliente cadastrado com esse cpf");
+                throw new CustonException("Ja existe um cliente cadastrado com esse cpf "+client.getCpf());
             }
         } else {
             Client clientAlteration = clientRepository.findById(client.getId()).get();
             if (clientRepository.existsByCpf(client.getCpf()) && !client.getCpf().equals(clientAlteration.getCpf())){
-                throw new CustonException("Ja existe outro cliente cadastrado com esse cpf");
+                throw new CustonException("Ja existe outro cliente cadastrado com esse cpf "+client.getCpf());
             }
         }
     }
