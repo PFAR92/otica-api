@@ -91,25 +91,25 @@ public class EmployeeService{
 
     public void existsEmployee (Long id){
         if (!employeeRepository.existsById(id)){
-            throw new CustonException("Esse funcionario nao existe");
+            throw new CustonException("O funcionario com o id "+id+", nao existe");
         }
     }
 
     public void existsEmployee (String cpf){
         if (!employeeRepository.existsByCpf(cpf)){
-            throw new CustonException("Esse funcionario nao existe");
+            throw new CustonException("O funcionario com o cpf "+cpf+", nao existe");
         }
     }
 
     public void employeeCannotBeRegistered (Employee employee){
         if (employee.getId() == null){
             if (employeeRepository.existsByCpf(employee.getCpf())){
-                throw new CustonException("Ja existe um funcionario com esse cpf cadastrado");
+                throw new CustonException("Ja existe um funcionario cadastrado com esse cpf "+employee.getCpf());
             }
         } else {
             Employee employeeAlteration = employeeRepository.findById(employee.getId()).get();
             if (employeeRepository.existsByCpf(employee.getCpf()) && !employee.getCpf().equals(employeeAlteration.getCpf())){
-                throw new CustonException("Ja existe um funcionario cadastrado com esse cpf");
+                throw new CustonException("Ja existe um funcionario cadastrado com esse cpf "+employee.getCpf());
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.otica.oticaapi.controller.people;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -20,36 +21,43 @@ public class ProviderController {
     private ProviderService providerService;
 
     @GetMapping("/id")
+    @ResponseStatus(HttpStatus.OK)
     public Provider searchId(@RequestBody Provider provider){
         return providerService.searchId(provider);
     }
 
     @GetMapping(value = "/cnpj")
+    @ResponseStatus(HttpStatus.OK)
     public Provider searchCnpj(@RequestBody Provider provider){
         return providerService.searchCnpj(provider);
     }
 
     @GetMapping(value = "/names")
+    @ResponseStatus(HttpStatus.OK)
     public List<Provider> searchNames(@RequestBody Provider provider){
         return providerService.searchNames(provider);
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<Provider> list(){
         return providerService.list();
     }
 
     @PostMapping
-    public ResponseEntity<Provider> save (@RequestBody @Valid Provider provider){
+    @ResponseStatus(HttpStatus.CREATED)
+    public Provider save (@RequestBody @Valid Provider provider){
         return providerService.save(provider);
     }
 
     @PutMapping
-    public ResponseEntity<Provider> alteration(@RequestBody @Valid Provider provider){
+    @ResponseStatus(HttpStatus.OK)
+    public Provider alteration(@RequestBody @Valid Provider provider){
         return providerService.alteration(provider);
     }
 
     @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete (@RequestBody Provider provider){
         providerService.delete(provider);
     }

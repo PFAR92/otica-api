@@ -1,50 +1,45 @@
 package com.otica.oticaapi.service.people;
 
-import java.util.List;
-
+import com.otica.oticaapi.model.people.Provider;
 import com.otica.oticaapi.repository.address.AddressRepository;
+import com.otica.oticaapi.repository.people.ProviderRepository;
 import com.otica.oticaapi.service.address.AddressCepConsult;
+import com.otica.oticaapi.service.address.AddressService;
+import com.otica.oticaapi.service.exceptions.CustonException;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.otica.oticaapi.service.exceptions.CustonException;
-import com.otica.oticaapi.model.people.Provider;
-import com.otica.oticaapi.repository.people.ProviderRepository;
+import java.util.List;
 
 @Service
 @Log4j2
+
+@AllArgsConstructor
 public class ProviderService{
     
-    @Autowired
+
     private ProviderRepository providerRepository;
-    @Autowired
     private AddressRepository addressRepository;
-    @Autowired
-    private AddressCepConsult addressCepConsult;
+    private AddressService addressService;
 
 
     
     public Provider searchId(Provider provider) {
         log.info("Solicitou busca do Fornecedor por ID, ID digitado: " + provider.getId());
-        if (!providerRepository.existsById(provider.getId())){
-            throw new CustonException("Esse Fornecedor nao existe");
-        } else {
-            log.info("Fornecedor encontrado");
-            return providerRepository.findById(provider.getId()).get();
-        }
+        existsProvider(provider.getId());
+        log.info("Fornecedor encontrado");
+        return providerRepository.findById(provider.getId()).get();
     }
 
     public Provider searchCnpj(Provider provider){
         log.info("Solicitou busca por CNPJ do Fornecedor, CNPJ digitado: " + provider.getCnpj());
-        if (!providerRepository.existsByCnpj(provider.getCnpj())){
-            throw new CustonException("Esse Fornecedor nao existe!");
-        } else {
-            log.info("Fornecedor encontrado");
-            return providerRepository.findByCnpj(provider.getCnpj()).get();
-        }
+        existsProvider(provider.getCnpj());
+        log.info("Fornecedor encontrado");
+        return providerRepository.findByCnpj(provider.getCnpj()).get();
     }
 
     public List<Provider> searchNames(Provider provider){
@@ -59,51 +54,63 @@ public class ProviderService{
     }
 
     
-    public ResponseEntity<Provider> save(Provider provider) {
+    public Provider save(Provider provider) {
 
         log.info("Solicitou cadastro de novo fornecedor");
-        if (providerRepository.existsByCnpj(provider.getCnpj())) {
-            throw new CustonException("Cnpj ja cadastrado");
-        } else {
-            String cep = provider.getAddress().getCep();
-            provider.setAddress(addressCepConsult.addressCep(cep));
-            if (!addressRepository.existsById(cep)){
-                addressRepository.save(provider.getAddress());
-            }
-            log.info("Fornecedor cadastrado com sucesso!");
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(providerRepository.save(provider));
-        }
+        providerCannotBeRegistered(provider);
+        provider.setAddress(addressService.addressCep(provider.getAddress().getCep()));
+        addressService.thisAddressDoesNotExist(provider.getAddress());
+        log.info("Fornecedor cadastrado com sucesso!");
+
+        return providerRepository.save(provider);
+
     }
 
     
-    public ResponseEntity<Provider> alteration(Provider provider) {
+    public Provider alteration(Provider provider) {
         log.info("Solicitou alterar o Fornecedor com o ID: " + provider.getId());
-        if(!providerRepository.existsById(provider.getId())) {
-            throw new CustonException("Esse Fornecedor nao existe!");
-        }
-        Provider providerAlteration = providerRepository.findById(provider.getId()).get();
-        if (providerRepository.existsByCnpj(provider.getCnpj()) && !providerAlteration.getCnpj().equals(provider.getCnpj())){
-            throw new CustonException("Esse Cnpj ja esta cadastrado em um Fornecedor ativo");
-        } else {
-            log.info("Fornecedor com ID: " + provider.getId() + ", alterado com sucesso!");
-            provider.setAddress(addressCepConsult.addressCep(provider.getAddress().getCep()));
-            if (!addressRepository.existsById(provider.getAddress().getCep())){
-                addressRepository.save(provider.getAddress());
-            }
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(providerRepository.save(provider));
-        }
+        existsProvider(provider.getId());
+        providerCannotBeRegistered(provider);
+        log.info("Fornecedor com ID: " + provider.getId() + ", alterado com sucesso!");
+        provider.setAddress(addressService.addressCep(provider.getAddress().getCep()));
+        addressService.thisAddressDoesNotExist(provider.getAddress());
+
+        return providerRepository.save(provider);
     }
 
     
     public void delete(Provider provider) {
 
-        log.info("Solicitou excluir Fornecedor com o ID: " + provider.getId());
-        if(!providerRepository.existsById(provider.getId())) {
-            throw new CustonException("Esse Fornecedor nao existe!");
+        existsProvider(provider.getId());
+        providerRepository.deleteById(provider.getId());
+        log.info("Fornecedor com o ID: " + provider.getId() + " excluido com sucesso!");
+
+    }
+
+
+
+    public void existsProvider (Long id){
+        if (!providerRepository.existsById(id)){
+            throw new CustonException("O fornecedor com o id " + id+ ", nao existe");
+        }
+    }
+
+    public void existsProvider (String cnpj){
+        if (!providerRepository.existsByCnpj(cnpj)){
+            throw new CustonException("O fornecedor com o cnpj " +cnpj+ ", nao existe");
+        }
+    }
+
+    public void providerCannotBeRegistered (Provider provider){
+        if (provider.getId() == null){
+            if (providerRepository.existsByCnpj(provider.getCnpj())){
+                throw new CustonException("Ja existe um fornecedor com o cnpj "+provider.getCnpj()+", cadastrado");
+            }
         } else {
-            log.info("Fornecedor com o ID: " + provider.getId() + " excluido com sucesso!");
-            providerRepository.deleteById(provider.getId());
-            ResponseEntity.noContent().build();
+            Provider providerAlteration = providerRepository.findById(provider.getId()).get();
+            if (providerRepository.existsByCnpj(provider.getCnpj()) && !providerAlteration.getCnpj().equals(provider.getCnpj())){
+                throw new CustonException("Existe outro fornecedor cadastrado com o cnpj "+provider.getCnpj());
+            }
         }
     }
 }
