@@ -109,7 +109,7 @@ public class SaleService {
                 boolean quantity = productSave.getQuantity() - sale_productSave.getOriginalQuantity() < 0;
                 if (!quantity){
                     productSave.setQuantity(productSave.getQuantity() - sale_productSave.getOriginalQuantity());
-                    productService.alteration(productSave);
+                    productService.save(productSave);
                 } else {
                     throw new CustonException("a quantidade da venda é maior que a quantidade em estoque, favor atualizar");
                 }
@@ -172,7 +172,7 @@ public class SaleService {
             Product productSave = productRepository.findByNameAndModel(saleProduct.getProduct().getName(),
                     saleProduct.getProduct().getModel());
             productSave.setQuantity(productSave.getQuantity() + saleProduct.getOriginalQuantity());
-            productService.alteration(productSave);
+            productService.save(productSave);
 
             //se um produto foi retirado da lista ele é deletado da venda
             boolean isPresent = sale.getProducts().contains(saleProduct);
@@ -200,7 +200,7 @@ public class SaleService {
                 boolean quantity = productSave.getQuantity() - sale_productSave.getOriginalQuantity() < 0;
                 if (!quantity){
                     productSave.setQuantity(productSave.getQuantity() - sale_productSave.getOriginalQuantity());
-                    productService.alteration(productSave);
+                    productService.save(productSave);
                 } else {
                     throw new CustonException("a quantidade da venda é maior que a quantidade em estoque, favor atualizar");
                 }
@@ -248,7 +248,7 @@ public class SaleService {
         for (Sale_Product product : saleDelete.getProducts()){
             Product productReturn = productRepository.findById(product.getProduct().getId()).get();
             productReturn.setQuantity(productReturn.getQuantity() + product.getOriginalQuantity());
-            productService.alteration(productReturn);
+            productService.save(productReturn);
             sale_productRepository.delete(product);
         }
         saleRepository.deleteById(sale.getId());

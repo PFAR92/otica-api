@@ -104,7 +104,7 @@ public class AcquisitionService {
                 //se o produto ja existir aumenta a quantidade no banco de dados
                 Product productAlteration = productRepository.findById(product.getId()).get();
                 productAlteration.setQuantity(productAlteration.getQuantity() + product.getQuantity());
-                productService.alteration(productAlteration);
+                productService.save(productAlteration);
 
                 //calcula o valor total da compra através do valor dos produtos
                 BigDecimal value = acquisition_product.getProduct().getPurchase_price()
@@ -160,7 +160,7 @@ public class AcquisitionService {
             Product productSave = productRepository.findByNameAndModel(acquisitionProduct.getProduct().getName()
                     , acquisitionProduct.getProduct().getModel());
             productSave.setQuantity(productSave.getQuantity() - acquisitionProduct.getOriginalQuantity());
-            productService.alteration(productSave);
+            productService.save(productSave);
 
             //se um produto foi retirado ele é deletado da compra
             boolean isPresent = acquisition.getProducts().contains(acquisitionProduct);
@@ -185,7 +185,7 @@ public class AcquisitionService {
                 //se o produto ja existir aumenta a quantidade no banco de dados
                 Product productAlteration = productRepository.findById(product.getId()).get();
                 productAlteration.setQuantity(productAlteration.getQuantity() + product.getQuantity());
-                productService.alteration(productAlteration);
+                productService.save(productAlteration);
 
             //calcula o valor total da compra através do valor dos produtos
             BigDecimal value = acquisition_product.getProduct().getPurchase_price()
@@ -225,7 +225,7 @@ public class AcquisitionService {
         for (Acquisition_Product acquisitionProduct : acquisitionDelete.getProducts()){
             Product product = productRepository.findById(acquisitionProduct.getProduct().getId()).get();
             product.setQuantity(product.getQuantity() - acquisitionProduct.getOriginalQuantity());
-            productService.alteration(product);
+            productService.save(product);
             acquisition_productRepository.delete(acquisitionProduct);
         }
 
