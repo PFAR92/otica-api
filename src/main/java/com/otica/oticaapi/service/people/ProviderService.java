@@ -89,6 +89,11 @@ public class ProviderService{
 
 
 
+
+
+
+
+
     public void existsProvider (Long id){
         if (!providerRepository.existsById(id)){
             throw new CustonException("O fornecedor com o id " + id+ ", nao existe");
