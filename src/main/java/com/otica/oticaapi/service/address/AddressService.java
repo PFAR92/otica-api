@@ -30,7 +30,7 @@ public class AddressService {
     public void thisAddressDoesNotExist(Address address){
         if (!addressRepository.existsById(address.getCep())){
             addressRepository.save(address);
-            log.info("endereço salvo");
+            log.info("endereco salvo");
         }
     }
 }

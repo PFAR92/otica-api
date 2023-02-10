@@ -7,6 +7,7 @@ import com.otica.oticaapi.service.exceptions.CustonException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class ClientService{
         log.info("Solicitou busca por todos os clientes");
         return clientRepository.findAll();
     }
-
+    @Transactional
     public Client save(Client client) {
 
         log.info("Solicitou cadastrar novo cliente");
@@ -53,6 +54,7 @@ public class ClientService{
         log.info("Cliente cadastrado com sucesso");
         return clientRepository.save(client);
     }
+    @Transactional
     public Client alteration(Client client) {
 
         log.info("Solicitou alterar o cliente com o ID: " + client.getId());

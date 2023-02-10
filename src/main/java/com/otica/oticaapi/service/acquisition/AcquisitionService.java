@@ -3,17 +3,20 @@ package com.otica.oticaapi.service.acquisition;
 import com.otica.oticaapi.model.acquisition.Acquisition;
 import com.otica.oticaapi.model.acquisition.Acquisition_Product;
 import com.otica.oticaapi.model.product.Product;
+import com.otica.oticaapi.repository.acquisition.AcquisitionRepository;
 import com.otica.oticaapi.repository.acquisition.Acquisition_ProductRepository;
 import com.otica.oticaapi.repository.people.ProviderRepository;
-import com.otica.oticaapi.repository.acquisition.AcquisitionRepository;
 import com.otica.oticaapi.repository.product.ProductRepository;
 import com.otica.oticaapi.service.exceptions.CustonException;
+import com.otica.oticaapi.service.people.ProviderService;
 import com.otica.oticaapi.service.product.ProductService;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,65 +25,40 @@ import java.util.NoSuchElementException;
 
 @Log4j2
 @Service
+@AllArgsConstructor
 public class AcquisitionService {
-    @Autowired
+
+    private ProviderService providerService;
     private ProviderRepository providerRepository;
-
-    @Autowired
     private AcquisitionRepository acquisitionRepository;
-
-    @Autowired
     private ProductService productService;
-
-    @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
     private Acquisition_ProductRepository acquisition_productRepository;
 
 
     public Acquisition searchId(Acquisition acquisition) {
         log.info("Solicitou busca de compra por id, id digitado: " + acquisition.getId());
-        if (!acquisitionRepository.existsById(acquisition.getId())){
-            throw new CustonException("Essa compra nao existe");
-        } else {
-            log.info("Compra com o id:" + acquisition.getId() + ", encontrado");
-            Acquisition acquisitionOrigin = acquisitionRepository.findById(acquisition.getId()).get();
-            for (Acquisition_Product product : acquisitionOrigin.getProducts()){
-                product.getProduct().setQuantity(product.getOriginalQuantity());
-            }
-            return acquisitionOrigin;
-        }
+        existsAcquisition(acquisition.getId());
+        log.info("Compra com o id:" + acquisition.getId() + ", encontrado");
+        return searchWithTheOriginalQuantity(acquisition);
     }
     public List<Acquisition> searchMonth(Acquisition acquisition) {
         log.info("Solicitou a busca de compras do mes:" + acquisition.getDate().getMonthValue()+"/"+acquisition.getDate().getYear());
-        List<Acquisition> acquisitionOrigin = acquisitionRepository.searchMonth(acquisition.getDate()
-                .getYear(), acquisition.getDate().getMonthValue());
-        for (Acquisition acquisition1 : acquisitionOrigin){
-            for (Acquisition_Product product : acquisition1.getProducts()){
-                product.getProduct().setQuantity(product.getOriginalQuantity());
-            }
-        }
-        return acquisitionOrigin;
+        return searchWithTheOriginalQuantity(acquisitionRepository.searchMonth(acquisition.getDate()
+                .getYear(), acquisition.getDate().getMonthValue()));
     }
 
     public List<Acquisition> list() {
-        List<Acquisition> acquisitions = acquisitionRepository.findAll();
-        for (Acquisition acquisition : acquisitions) {
-            for (Acquisition_Product acquisitionProduct : acquisition.getProducts()) {
-                acquisitionProduct.getProduct().setQuantity(acquisitionProduct.getOriginalQuantity());
-            }
-        }
-        return acquisitions;
-    }
 
-    public ResponseEntity<Acquisition> save(Acquisition acquisition) {
+        return searchWithTheOriginalQuantity(acquisitionRepository.findAll());
+    }
+    @Transactional
+    public Acquisition save(Acquisition acquisition) {
         log.info("Solicitou cadastrar uma nova compra");
-        try {
-            acquisition.setProvider(providerRepository.findByCnpj(acquisition.getProvider().getCnpj()).get());
-        } catch (NoSuchElementException ex){
-            throw new CustonException("Esse Fornecedor nao existe, favor cadastrar antes, e passar o cnpj correto");
+        if (providerService.providerDoesNotExist(acquisition.getProvider().getCnpj())){
+            providerService.save(acquisition.getProvider());
         }
+        acquisition.setProvider(providerService.searchCnpj(acquisition.getProvider()));
         if (acquisitionRepository.existsByDateAndProvider(acquisition.getDate(), acquisition.getProvider())){
             throw new CustonException("Ja existe uma compra cadastrada com essa data e fornecedor, favor atualizar a compra existente!");
         }
@@ -130,7 +108,7 @@ public class AcquisitionService {
         acquisition.setProducts(acquisition_products);
         acquisitionRepository.save(acquisition);
         acquisition_productRepository.saveAll(acquisition_products);
-        return ResponseEntity.ok().body(acquisition);
+        return acquisition;
     }
 
     public ResponseEntity<Acquisition> alteration(Acquisition acquisition) {
@@ -234,4 +212,30 @@ public class AcquisitionService {
         ResponseEntity.noContent().build();
     }
 
+
+
+
+
+    public void existsAcquisition (Long id){
+        if (!acquisitionRepository.existsById(id)){
+            throw new CustonException("A compra com o id "+id+", nao existe");
+        }
+    }
+
+    public Acquisition searchWithTheOriginalQuantity (Acquisition acquisition){
+        Acquisition acquisitionAlteration = acquisitionRepository.findById(acquisition.getId()).get();
+        for (Acquisition_Product product : acquisitionAlteration.getProducts()){
+            product.getProduct().setQuantity(product.getOriginalQuantity());
+        }
+        return acquisitionAlteration;
+    }
+
+    public List<Acquisition> searchWithTheOriginalQuantity (List<Acquisition> acquisitions){
+        for (Acquisition acquisition : acquisitions){
+            for (Acquisition_Product product : acquisition.getProducts()){
+                product.getProduct().setQuantity(product.getOriginalQuantity());
+            }
+        }
+        return acquisitions;
+    }
 }

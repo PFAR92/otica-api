@@ -1,20 +1,15 @@
 package com.otica.oticaapi.service.people;
 
-import java.util.List;
-
-import com.otica.oticaapi.repository.address.AddressRepository;
-import com.otica.oticaapi.service.address.AddressCepConsult;
-import com.otica.oticaapi.service.address.AddressService;
-import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
-import com.otica.oticaapi.service.exceptions.CustonException;
 import com.otica.oticaapi.model.people.Employee;
 import com.otica.oticaapi.repository.people.EmployeeRepository;
+import com.otica.oticaapi.service.address.AddressService;
+import com.otica.oticaapi.service.exceptions.CustonException;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Log4j2
@@ -50,7 +45,7 @@ public class EmployeeService{
         log.info("Solicitou todos os Funcionarios");
         return employeeRepository.findAll();
     }
-
+    @Transactional
     public Employee save(Employee employee) {
 
         log.info("Solicitou cadastrar novo Funcionario");
@@ -63,7 +58,7 @@ public class EmployeeService{
         return employeeRepository.save(employee);
 
     }
-
+    @Transactional
     public Employee alteration(Employee employee) {
 
         log.info("Solicitou alterar o Funcionario com o ID: " + employee.getId());

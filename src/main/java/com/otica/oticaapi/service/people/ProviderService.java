@@ -1,18 +1,14 @@
 package com.otica.oticaapi.service.people;
 
 import com.otica.oticaapi.model.people.Provider;
-import com.otica.oticaapi.repository.address.AddressRepository;
 import com.otica.oticaapi.repository.people.ProviderRepository;
-import com.otica.oticaapi.service.address.AddressCepConsult;
 import com.otica.oticaapi.service.address.AddressService;
 import com.otica.oticaapi.service.exceptions.CustonException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Service
@@ -20,10 +16,9 @@ import java.util.List;
 
 @AllArgsConstructor
 public class ProviderService{
-    
+
 
     private ProviderRepository providerRepository;
-    private AddressRepository addressRepository;
     private AddressService addressService;
 
 
@@ -56,7 +51,7 @@ public class ProviderService{
     
     public Provider save(Provider provider) {
 
-        log.info("Solicitou cadastro de novo fornecedor");
+        log.info("Solicitou cadastro de um novo fornecedor");
         providerCannotBeRegistered(provider);
         provider.setAddress(addressService.addressCep(provider.getAddress().getCep()));
         addressService.thisAddressDoesNotExist(provider.getAddress());
@@ -106,8 +101,11 @@ public class ProviderService{
         }
     }
 
+    public boolean providerDoesNotExist (String cnpj){
+        return !providerRepository.existsByCnpj(cnpj);
+    }
     public void providerCannotBeRegistered (Provider provider){
-        if (provider.getId() == null){
+        if (!providerRepository.existsById(provider.getId())){
             if (providerRepository.existsByCnpj(provider.getCnpj())){
                 throw new CustonException("Ja existe um fornecedor com o cnpj "+provider.getCnpj()+", cadastrado");
             }
