@@ -24,13 +24,11 @@ public class ClientService{
     public Client searchId(Client client) {
         log.info("Solicitando busca por ID, ID digitado: " + client.getId());
         existsClient(client.getId());
-        log.info("CLiente encontrado");
         return clientRepository.findById(client.getId()).get();
     }
     public Client searchCpf (Client client){
         log.info("Solicitando busca por CPF do Cliente, CPF digitado: " + client.getCpf());
         existsClient(client.getCpf());
-        log.info("CLiente encontrado");
         return clientRepository.findByCpf(client.getCpf()).get();
     }
     public List<Client> searchNames (Client client) {
@@ -46,11 +44,8 @@ public class ClientService{
 
         log.info("Solicitou cadastrar novo cliente");
         clientCannotBeRegistered(client);
-
         client.setAddress(addressService.addressCep(client.getAddress().getCep()));
-
         addressService.thisAddressDoesNotExist(client.getAddress());
-
         log.info("Cliente cadastrado com sucesso");
         return clientRepository.save(client);
     }
@@ -59,12 +54,9 @@ public class ClientService{
 
         log.info("Solicitou alterar o cliente com o ID: " + client.getId());
         existsClient(client.getId());
-
         clientCannotBeRegistered(client);
-
         client.setAddress(addressService.addressCep(client.getAddress().getCep()));
         addressService.thisAddressDoesNotExist(client.getAddress());
-
         log.info("Cliente com o ID: " + client.getId() + " alterado com sucesso!");
         return clientRepository.save(client);
     }
@@ -85,11 +77,15 @@ public class ClientService{
     public void existsClient(Long id){
         if (!clientRepository.existsById(id)){
             throw new CustonException("O cliente com o id "+id+", nao existe");
+        } else {
+            log.info("CLiente encontrado");
         }
     }
     public void existsClient(String cpf){
         if (!clientRepository.existsByCpf(cpf)){
             throw new CustonException("Nao existe cliente com esse cpf " +cpf);
+        } else {
+            log.info("CLiente encontrado");
         }
     }
 

@@ -24,14 +24,12 @@ public class EmployeeService{
     public Employee searchId(Employee employee) {
         log.info("Solicitou busca po ID do Funcionario, ID digitado: " + employee.getId());
         existsEmployee(employee.getId());
-        log.info("Funcionario encontrado");
         return employeeRepository.findById(employee.getId()).get();
     }
 
     public Employee searchCpf(Employee employee){
         log.info("Solicitou Busca por CPF do Funcionario, CPF digitado: " + employee.getCpf());
         existsEmployee(employee.getCpf());
-        log.info("Funcionario encontrado");
         return employeeRepository.findByCpf(employee.getCpf()).get();
 
     }
@@ -50,11 +48,9 @@ public class EmployeeService{
 
         log.info("Solicitou cadastrar novo Funcionario");
         employeeCannotBeRegistered(employee);
-
         employee.setAddress(addressService.addressCep(employee.getAddress().getCep()));
         addressService.thisAddressDoesNotExist(employee.getAddress());
         log.info("Funcionario cadastrado com sucesso!");
-
         return employeeRepository.save(employee);
 
     }
@@ -67,7 +63,6 @@ public class EmployeeService{
         log.info("Funcionario com o ID: " + employee.getId() + ", alterado com sucesso!");
         employee.setAddress(addressService.addressCep(employee.getAddress().getCep()));
         addressService.thisAddressDoesNotExist(employee.getAddress());
-
         return employeeRepository.save(employee);
     }
 
@@ -87,12 +82,16 @@ public class EmployeeService{
     public void existsEmployee (Long id){
         if (!employeeRepository.existsById(id)){
             throw new CustonException("O funcionario com o id "+id+", nao existe");
+        } else {
+            log.info("Funcionario encontrado");
         }
     }
 
     public void existsEmployee (String cpf){
         if (!employeeRepository.existsByCpf(cpf)){
             throw new CustonException("O funcionario com o cpf "+cpf+", nao existe");
+        } else {
+            log.info("Funcionario encontrado");
         }
     }
 

@@ -3,6 +3,7 @@ package com.otica.oticaapi.service.product;
 import com.otica.oticaapi.model.product.Product;
 import com.otica.oticaapi.repository.product.ProductRepository;
 import com.otica.oticaapi.service.exceptions.CustonException;
+import javafx.css.Styleable;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -59,5 +60,13 @@ public class ProductService {
         if (!productRepository.existsById(id)){
             throw new CustonException("O produto com id "+id+", nao existe");
         }
+    }
+
+    public boolean existsByNameAndModel(String name, String model) {
+        return productRepository.existsByNameAndModel(name, model);
+    }
+
+    public Product findByNameAndModel(String name, String model) {
+        return productRepository.findByNameAndModel(name, model);
     }
 }

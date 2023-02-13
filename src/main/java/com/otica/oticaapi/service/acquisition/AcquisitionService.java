@@ -4,9 +4,7 @@ import com.otica.oticaapi.model.acquisition.Acquisition;
 import com.otica.oticaapi.model.acquisition.Acquisition_Product;
 import com.otica.oticaapi.model.product.Product;
 import com.otica.oticaapi.repository.acquisition.AcquisitionRepository;
-import com.otica.oticaapi.repository.acquisition.Acquisition_ProductRepository;
 import com.otica.oticaapi.repository.people.ProviderRepository;
-import com.otica.oticaapi.repository.product.ProductRepository;
 import com.otica.oticaapi.service.exceptions.CustonException;
 import com.otica.oticaapi.service.people.ProviderService;
 import com.otica.oticaapi.service.product.ProductService;
@@ -16,12 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Log4j2
 @Service
@@ -32,8 +28,7 @@ public class AcquisitionService {
     private ProviderRepository providerRepository;
     private AcquisitionRepository acquisitionRepository;
     private ProductService productService;
-    private ProductRepository productRepository;
-    private Acquisition_ProductRepository acquisition_productRepository;
+    private Acquisition_ProductService acquisition_productService;
 
 
     public Acquisition searchId(Acquisition acquisition) {
@@ -55,13 +50,9 @@ public class AcquisitionService {
     @Transactional
     public Acquisition save(Acquisition acquisition) {
         log.info("Solicitou cadastrar uma nova compra");
-        if (providerService.providerDoesNotExist(acquisition.getProvider().getCnpj())){
-            providerService.save(acquisition.getProvider());
-        }
+        providerService.existsProvider(acquisition.getProvider().getCnpj());
         acquisition.setProvider(providerService.searchCnpj(acquisition.getProvider()));
-        if (acquisitionRepository.existsByDateAndProvider(acquisition.getDate(), acquisition.getProvider())){
-            throw new CustonException("Ja existe uma compra cadastrada com essa data e fornecedor, favor atualizar a compra existente!");
-        }
+        acquisitionCanBeRegistered(acquisition);
         //se a data não for preenchida será usada a data atual
         if (acquisition.getDate() == null){
             acquisition.setDate(LocalDate.now());
@@ -72,15 +63,12 @@ public class AcquisitionService {
         for (Acquisition_Product productList : acquisition.getProducts()){
             Product product = productList.getProduct();
             Acquisition_Product acquisition_product = new Acquisition_Product();
-            if (productRepository.existsByNameAndModel(product.getName(), product.getModel())){
-                product.setId(productRepository.findByNameAndModel(product.getName(), product.getModel()).getId());
-                acquisition_product.setAcquisition(acquisition);
-                acquisition_product.setProduct(product);
-                acquisition_product.setOriginalQuantity(product.getQuantity());
-                acquisition_products.add(acquisition_product);
+            if (productService.existsByNameAndModel(product.getName(), product.getModel())){
+                product.setId(productService.findByNameAndModel(product.getName(), product.getModel()).getId());
+                acquisition_products.add(acquisition_productService.save(product, acquisition));
 
-                //se o produto ja existir aumenta a quantidade no banco de dados
-                Product productAlteration = productRepository.findById(product.getId()).get();
+                //aumenta a quantidade no banco de dados
+                Product productAlteration = productService.searchId(product);
                 productAlteration.setQuantity(productAlteration.getQuantity() + product.getQuantity());
                 productService.save(productAlteration);
 
@@ -91,12 +79,9 @@ public class AcquisitionService {
 
             } else {
                 //se o produto não existir ele é salvo
-                productRepository.save(product);
-                Product productSave = productRepository.findByNameAndModel(product.getName(), product.getModel());
-                acquisition_product.setAcquisition(acquisition);
-                acquisition_product.setProduct(productSave);
-                acquisition_product.setOriginalQuantity(product.getQuantity());
-                acquisition_products.add(acquisition_product);
+                productService.save(product);
+                Product productSave = productService.findByNameAndModel(product.getName(), product.getModel());
+                acquisition_products.add(acquisition_productService.save(productSave, acquisition));
 
                 //calcula o valor total da compra através do valor dos produtos
                 BigDecimal value = product.getPurchase_price().multiply(BigDecimal.valueOf(product.getQuantity()));
@@ -107,35 +92,27 @@ public class AcquisitionService {
         acquisition.setFullValue(fullValue);
         acquisition.setProducts(acquisition_products);
         acquisitionRepository.save(acquisition);
-        acquisition_productRepository.saveAll(acquisition_products);
+        acquisition_productService.saveAll(acquisition_products);
         return acquisition;
     }
 
     public ResponseEntity<Acquisition> alteration(Acquisition acquisition) {
         log.info("Solicitou alterar a compra com id: " + acquisition.getId());
-        if (!acquisitionRepository.existsById(acquisition.getId())){
-            throw new CustonException("Essa compra nao existe");
-        }
-        if (!providerRepository.existsByCnpj(acquisition.getProvider().getCnpj())){
-            throw new CustonException("Esse Fornecedor nao existe, favor cadastrar antes");
-        }
-        //verifica se o usuário não alterou para um compra com o mesmo fornecedor e data de alguma compra que ja existe
-        Acquisition acquisitionAlteration = acquisitionRepository.findById(acquisition.getId()).get();
-        boolean validation = !acquisitionAlteration.getDate().equals(acquisition.getDate()) && acquisitionAlteration.getProvider()
-                                .equals(acquisition.getProvider());
-        if (validation && acquisitionRepository.existsByDateAndProvider(acquisition.getDate(), acquisition.getProvider())){
-            throw new CustonException("Ja existe outra compra salva com essa data e fornecedor, favor atualizar a compra correta");
-        }
-
+        existsAcquisition(acquisition.getId());
+        providerService.existsProvider(acquisition.getProvider().getCnpj());
         acquisition.setProvider(providerRepository.findByCnpj(acquisition.getProvider().getCnpj()).get());
+
+        acquisitionCanBeRegistered(acquisition);
+
         List<Acquisition_Product> acquisition_products = new ArrayList<>();
         BigDecimal fullValue = BigDecimal.valueOf(0.0);
 
         //Analisa todos os produtos da compra a ser alterada
+        Acquisition acquisitionAlteration = acquisitionRepository.findById(acquisition.getId()).get();
         for (Acquisition_Product acquisitionProduct : acquisitionAlteration.getProducts()){
 
             //retira a quantidade dos produtos do banco de dados para a compra ser alterada
-            Product productSave = productRepository.findByNameAndModel(acquisitionProduct.getProduct().getName()
+            Product productSave = productService.findByNameAndModel(acquisitionProduct.getProduct().getName()
                     , acquisitionProduct.getProduct().getModel());
             productSave.setQuantity(productSave.getQuantity() - acquisitionProduct.getOriginalQuantity());
             productService.save(productSave);
@@ -143,25 +120,21 @@ public class AcquisitionService {
             //se um produto foi retirado ele é deletado da compra
             boolean isPresent = acquisition.getProducts().contains(acquisitionProduct);
             if (!isPresent){
-                acquisition_productRepository.deleteById(acquisitionProduct.getId());
+                acquisition_productService.delete(acquisitionProduct.getId());
             }
         }
 
         //Analisa todos os produtos da compra alterada
         for (Acquisition_Product productList : acquisition.getProducts()){
             Product product = productList.getProduct();
-            Acquisition_Product acquisition_product = new Acquisition_Product();
 
-
-            if (productRepository.existsByNameAndModel(product.getName(), product.getModel())){
-                product.setId(productRepository.findByNameAndModel(product.getName(), product.getModel()).getId());
-                acquisition_product.setAcquisition(acquisition);
-                acquisition_product.setProduct(product);
-                acquisition_product.setOriginalQuantity(product.getQuantity());
+            if (productService.existsByNameAndModel(product.getName(), product.getModel())){
+                product.setId(productService.findByNameAndModel(product.getName(), product.getModel()).getId());
+                Acquisition_Product acquisition_product = acquisition_productService.save(product, acquisition);
                 acquisition_products.add(acquisition_product);
 
                 //se o produto ja existir aumenta a quantidade no banco de dados
-                Product productAlteration = productRepository.findById(product.getId()).get();
+                Product productAlteration = productService.searchId(product);
                 productAlteration.setQuantity(productAlteration.getQuantity() + product.getQuantity());
                 productService.save(productAlteration);
 
@@ -172,12 +145,9 @@ public class AcquisitionService {
 
             } else {
                 //se o produto não existir ele é salvo
-                productRepository.save(product);
-                Product productSave = productRepository.findByNameAndModel(product.getName(), product.getModel());
-                acquisition_product.setAcquisition(acquisition);
-                acquisition_product.setProduct(productSave);
-                acquisition_product.setOriginalQuantity(product.getQuantity());
-                acquisition_products.add(acquisition_product);
+                productService.save(product);
+                Product productSave = productService.findByNameAndModel(product.getName(), product.getModel());
+                acquisition_products.add(acquisition_productService.save(productSave, acquisition));
 
                 //calcula o valor total da compra através do valor dos produtos
                 BigDecimal value = product.getPurchase_price().multiply(BigDecimal.valueOf(product.getQuantity()));
@@ -188,23 +158,21 @@ public class AcquisitionService {
         acquisition.setFullValue(fullValue);
         acquisition.setProducts(acquisition_products);
         acquisitionRepository.save(acquisition);
-        acquisition_productRepository.saveAll(acquisition_products);
+        acquisition_productService.saveAll(acquisition_products);
         log.info("Compra alterada com sucesso");
         return ResponseEntity.ok().body(acquisition);
     }
 
     public void delete(Acquisition acquisition) {
         log.info("Solicitou deletar compra com o id:" + acquisition.getId());
-        if (!acquisitionRepository.existsById(acquisition.getId())){
-            throw new CustonException("Essa compra nao existe!");
-        }
+        existsAcquisition(acquisition.getId());
         //atualizar a quantidade dos produtos da compra deletada
         Acquisition acquisitionDelete = acquisitionRepository.findById(acquisition.getId()).get();
         for (Acquisition_Product acquisitionProduct : acquisitionDelete.getProducts()){
-            Product product = productRepository.findById(acquisitionProduct.getProduct().getId()).get();
+            Product product = productService.searchId(acquisitionProduct.getProduct());
             product.setQuantity(product.getQuantity() - acquisitionProduct.getOriginalQuantity());
             productService.save(product);
-            acquisition_productRepository.delete(acquisitionProduct);
+            acquisition_productService.delete(acquisitionProduct.getId());
         }
 
         acquisitionRepository.delete(acquisition);
@@ -219,6 +187,21 @@ public class AcquisitionService {
     public void existsAcquisition (Long id){
         if (!acquisitionRepository.existsById(id)){
             throw new CustonException("A compra com o id "+id+", nao existe");
+        }
+    }
+
+    public void acquisitionCanBeRegistered (Acquisition acquisition){
+        if (acquisition.getId() == null){
+            if (acquisitionRepository.existsByDateAndProvider(acquisition.getDate(), acquisition.getProvider())){
+                throw new CustonException("Ja existe uma compra cadastrada com essa data e fornecedor, favor atualizar a compra existente!");
+            }
+        } else {
+            Acquisition acquisitionAlteration = acquisitionRepository.findById(acquisition.getId()).get();
+            boolean validation = !acquisitionAlteration.getDate().equals(acquisition.getDate()) && acquisitionAlteration.getProvider()
+                    .equals(acquisition.getProvider());
+            if (validation && acquisitionRepository.existsByDateAndProvider(acquisition.getDate(), acquisition.getProvider())){
+                throw new CustonException("Ja existe outra compra salva com essa data e fornecedor, favor atualizar a compra correta");
+            }
         }
     }
 

@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Service
@@ -26,14 +25,12 @@ public class ProviderService{
     public Provider searchId(Provider provider) {
         log.info("Solicitou busca do Fornecedor por ID, ID digitado: " + provider.getId());
         existsProvider(provider.getId());
-        log.info("Fornecedor encontrado");
         return providerRepository.findById(provider.getId()).get();
     }
 
     public Provider searchCnpj(Provider provider){
         log.info("Solicitou busca por CNPJ do Fornecedor, CNPJ digitado: " + provider.getCnpj());
         existsProvider(provider.getCnpj());
-        log.info("Fornecedor encontrado");
         return providerRepository.findByCnpj(provider.getCnpj()).get();
     }
 
@@ -92,20 +89,21 @@ public class ProviderService{
     public void existsProvider (Long id){
         if (!providerRepository.existsById(id)){
             throw new CustonException("O fornecedor com o id " + id+ ", nao existe");
+        } else {
+            log.info("Fornecedor encontrado");
         }
     }
 
     public void existsProvider (String cnpj){
         if (!providerRepository.existsByCnpj(cnpj)){
             throw new CustonException("O fornecedor com o cnpj " +cnpj+ ", nao existe");
+        } else {
+            log.info("Fornecedor encontrado");
         }
     }
 
-    public boolean providerDoesNotExist (String cnpj){
-        return !providerRepository.existsByCnpj(cnpj);
-    }
     public void providerCannotBeRegistered (Provider provider){
-        if (!providerRepository.existsById(provider.getId())){
+        if (provider.getId() == null || !providerRepository.existsById(provider.getId())){
             if (providerRepository.existsByCnpj(provider.getCnpj())){
                 throw new CustonException("Ja existe um fornecedor com o cnpj "+provider.getCnpj()+", cadastrado");
             }
