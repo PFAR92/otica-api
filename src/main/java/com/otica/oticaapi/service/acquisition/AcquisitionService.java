@@ -73,7 +73,7 @@ public class AcquisitionService {
                 productService.save(productAlteration);
 
                 //calcula o valor total da compra através do valor dos produtos
-                BigDecimal value = acquisition_product.getProduct().getPurchase_price()
+                BigDecimal value = product.getPurchase_price()
                         .multiply(BigDecimal.valueOf(acquisition_product.getOriginalQuantity()));
                 fullValue = fullValue.add(value);
 
@@ -133,9 +133,10 @@ public class AcquisitionService {
                 Acquisition_Product acquisition_product = acquisition_productService.save(product, acquisition);
                 acquisition_products.add(acquisition_product);
 
-                //se o produto ja existir aumenta a quantidade no banco de dados
+                //se o produto ja existir aumenta a quantidade no banco de dados e atualiza o valor do produto
                 Product productAlteration = productService.searchId(product);
                 productAlteration.setQuantity(productAlteration.getQuantity() + product.getQuantity());
+                productAlteration.setPurchase_price(product.getPurchase_price());
                 productService.save(productAlteration);
 
             //calcula o valor total da compra através do valor dos produtos
