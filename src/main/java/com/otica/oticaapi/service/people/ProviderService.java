@@ -1,16 +1,11 @@
 package com.otica.oticaapi.service.people;
 
 import com.otica.oticaapi.model.people.Provider;
-import com.otica.oticaapi.repository.address.AddressRepository;
 import com.otica.oticaapi.repository.people.ProviderRepository;
-import com.otica.oticaapi.service.address.AddressCepConsult;
 import com.otica.oticaapi.service.address.AddressService;
 import com.otica.oticaapi.service.exceptions.CustonException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,10 +15,9 @@ import java.util.List;
 
 @AllArgsConstructor
 public class ProviderService{
-    
+
 
     private ProviderRepository providerRepository;
-    private AddressRepository addressRepository;
     private AddressService addressService;
 
 
@@ -31,14 +25,12 @@ public class ProviderService{
     public Provider searchId(Provider provider) {
         log.info("Solicitou busca do Fornecedor por ID, ID digitado: " + provider.getId());
         existsProvider(provider.getId());
-        log.info("Fornecedor encontrado");
         return providerRepository.findById(provider.getId()).get();
     }
 
     public Provider searchCnpj(Provider provider){
         log.info("Solicitou busca por CNPJ do Fornecedor, CNPJ digitado: " + provider.getCnpj());
         existsProvider(provider.getCnpj());
-        log.info("Fornecedor encontrado");
         return providerRepository.findByCnpj(provider.getCnpj()).get();
     }
 
@@ -56,7 +48,7 @@ public class ProviderService{
     
     public Provider save(Provider provider) {
 
-        log.info("Solicitou cadastro de novo fornecedor");
+        log.info("Solicitou cadastro de um novo fornecedor");
         providerCannotBeRegistered(provider);
         provider.setAddress(addressService.addressCep(provider.getAddress().getCep()));
         addressService.thisAddressDoesNotExist(provider.getAddress());
@@ -97,17 +89,21 @@ public class ProviderService{
     public void existsProvider (Long id){
         if (!providerRepository.existsById(id)){
             throw new CustonException("O fornecedor com o id " + id+ ", nao existe");
+        } else {
+            log.info("Fornecedor encontrado");
         }
     }
 
     public void existsProvider (String cnpj){
         if (!providerRepository.existsByCnpj(cnpj)){
             throw new CustonException("O fornecedor com o cnpj " +cnpj+ ", nao existe");
+        } else {
+            log.info("Fornecedor encontrado");
         }
     }
 
     public void providerCannotBeRegistered (Provider provider){
-        if (provider.getId() == null){
+        if (provider.getId() == null || !providerRepository.existsById(provider.getId())){
             if (providerRepository.existsByCnpj(provider.getCnpj())){
                 throw new CustonException("Ja existe um fornecedor com o cnpj "+provider.getCnpj()+", cadastrado");
             }
